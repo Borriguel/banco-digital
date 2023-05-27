@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:alpine
+    container_name: banco-digital-db
+    restart: always
+    environment:
+      POSTGRES_DB: banco-digital-db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5431:5432"
+    networks:
+      - banco-digital-network
+  api:
+    container_name: banco-digital-api
+    restart: always
+    build: .
+    working_dir: /banco-digital-api
+    ports:
+      - "8080:8080"
+    command: mvn spring-boot:run
+    depends_on:
+      - db
+    networks:
+      - banco-digital-network
+networks:
+  banco-digital-network:
+    driver: bridge

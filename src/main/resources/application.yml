@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: banco-digital-api
+  datasource:
+    url: jdbc:postgresql://db:5432/banco-digital-db
+    username: admin
+    password: admin
+  jpa:
+    show-sql: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: banco.digital.borriguel.dev@gmail.com
+    password: mtdjrpdbksvhatqa
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
