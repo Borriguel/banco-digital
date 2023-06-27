@@ -10,7 +10,7 @@ import javax.validation.constraints.Size;
 
 @Data
 @NoArgsConstructor
-public class ClientePost {
+public class ClienteRequest {
     @NotBlank(message = "Campo nome obrigatório")
     @Size(max = 50, min = 5, message = "Campo nome deve conter no máximo {max} e no mínimo {min} caracteres")
     private String nome;
