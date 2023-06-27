@@ -1,14 +1,10 @@
 package dev.borriguel.bancodigital.service.impl;
 
-import dev.borriguel.bancodigital.controller.dto.ComumDTO;
-import dev.borriguel.bancodigital.controller.dto.LojistaDTO;
-import dev.borriguel.bancodigital.controller.dto.TransacaoDTO;
-import dev.borriguel.bancodigital.controller.dto.TransacaoPost;
+import dev.borriguel.bancodigital.controller.dto.TransacaoRequest;
+import dev.borriguel.bancodigital.controller.dto.TransacaoResponse;
 import dev.borriguel.bancodigital.entity.Transacao;
 import dev.borriguel.bancodigital.exception.custom.ErroTransacaoException;
 import dev.borriguel.bancodigital.exception.custom.RecursoInvalidoException;
-import dev.borriguel.bancodigital.repository.ComumRepository;
-import dev.borriguel.bancodigital.repository.LojistaRepository;
 import dev.borriguel.bancodigital.repository.TransacaoRepository;
 import dev.borriguel.bancodigital.service.ComumService;
 import dev.borriguel.bancodigital.service.EmailService;
@@ -32,8 +28,6 @@ import java.time.LocalTime;
 public class TransacaoServiceImpl implements TransacaoService {
     private static final Logger logger = LoggerFactory.getLogger(TransacaoServiceImpl.class);
     private final TransacaoRepository transacaoRepository;
-    private final ComumRepository comumRepository;
-    private final LojistaRepository lojistaRepository;
     private final ComumService comumService;
     private final LojistaService lojistaService;
     private final ModelMapper modelMapper;
@@ -41,50 +35,47 @@ public class TransacaoServiceImpl implements TransacaoService {
 
     @Override
     @Transactional
-    public TransacaoDTO criarTransacao(TransacaoPost transacaoPost) {
-        checarTransacao(transacaoPost);
-        realizarTransacao(transacaoPost);
-        var transacao = modelMapper.map(transacaoPost, Transacao.class);
+    public Transacao criarTransacao(TransacaoRequest transacaoRequest) {
+        checarTransacao(transacaoRequest);
+        realizarTransacao(transacaoRequest);
+        var transacao = modelMapper.map(transacaoRequest, Transacao.class);
         transacao.setHora(LocalTime.now());
         transacao.setData(LocalDate.now());
         transacaoRepository.save(transacao);
         logger.info("Transação realizada -> {}", transacao);
         emailService.enviarEmail(transacao);
-        return modelMapper.map(transacao, TransacaoDTO.class);
+        return transacao;
     }
 
-    private void realizarTransacao(TransacaoPost transacaoPost) {
-        var pagador = comumRepository.findById(transacaoPost.getIdPagador())
-                .orElseThrow(() -> new RecursoInvalidoException("Id pagador não encontrado no banco de dados"));
-        var receptorLojista = lojistaRepository.findById(transacaoPost.getIdDeposito());
-        var receptorComum = comumRepository.findById(transacaoPost.getIdDeposito());
-        if (receptorLojista.isEmpty() && receptorComum.isEmpty())
-            throw new RecursoInvalidoException("Id não encontrado para beneficiário.");
-        var pagadorDTO = modelMapper.map(pagador, ComumDTO.class);
-        comumService.sacar(pagadorDTO, transacaoPost.getValorTransacao());
-        if (receptorComum.isPresent()) {
-            var comumDTO = modelMapper.map(receptorComum.get(), ComumDTO.class);
-            comumService.depositar(comumDTO, transacaoPost.getValorTransacao());
-        }
-        if (receptorLojista.isPresent()) {
-            var lojistaDTO = modelMapper.map(receptorLojista.get(), LojistaDTO.class);
-            lojistaService.depositar(lojistaDTO, transacaoPost.getValorTransacao());
+    private void realizarTransacao(TransacaoRequest transacaoRequest) {
+        var pagador = comumService.encontrarContaComumPorId(transacaoRequest.getIdPagador());
+        try {
+            var receptorLojista = lojistaService.encontrarContaLojistaPorId(transacaoRequest.getIdDeposito());
+            comumService.sacar(pagador, transacaoRequest.getValorTransacao());
+            lojistaService.depositar(receptorLojista, transacaoRequest.getValorTransacao());
+        } catch (RecursoInvalidoException e) {
+            try {
+                var receptorComum = comumService.encontrarContaComumPorId(transacaoRequest.getIdDeposito());
+                comumService.sacar(pagador, transacaoRequest.getValorTransacao());
+                comumService.depositar(receptorComum, transacaoRequest.getValorTransacao());
+            } catch (RecursoInvalidoException ex) {
+                throw new RecursoInvalidoException("Id não encontrado para beneficiário");
+            }
         }
     }
 
-    private void checarTransacao(TransacaoPost transacaoDTO) {
-        if (transacaoDTO.getValorTransacao().compareTo(BigDecimal.ZERO) <= 0)
+    private void checarTransacao(TransacaoRequest transacaoRequest) {
+        if (transacaoRequest.getValorTransacao().compareTo(BigDecimal.ZERO) <= 0)
             throw new ErroTransacaoException("Insira valor maior que zero para efetuar a transação.");
-        if (transacaoDTO.getIdPagador().equals(transacaoDTO.getIdDeposito()))
+        if (transacaoRequest.getIdPagador().equals(transacaoRequest.getIdDeposito()))
             throw new RecursoInvalidoException("Não é possível fazer transações pra mesma conta.");
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<TransacaoDTO> encontrarTransacoes(String min, String max, Pageable page) {
+    public Page<Transacao> encontrarTransacoes(String min, String max, Pageable page) {
         LocalDate dataMin = min.equals("") ? LocalDate.now().minusDays(7) : LocalDate.parse(min);
         LocalDate dataMax = max.equals("") ? LocalDate.now() : LocalDate.parse(max);
-        Page<Transacao> transacoes = transacaoRepository.encontrarTransacoes(dataMin, dataMax, page);
-        return transacoes.map(x -> modelMapper.map(x, TransacaoDTO.class));
+        return transacaoRepository.encontrarTransacoes(dataMin, dataMax, page);
     }
 }

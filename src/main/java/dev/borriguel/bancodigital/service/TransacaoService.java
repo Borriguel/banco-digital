@@ -1,6 +1,7 @@
 package dev.borriguel.bancodigital.service;
 
 import dev.borriguel.bancodigital.controller.dto.TransacaoRequest;
+import dev.borriguel.bancodigital.entity.Transacao;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,9 +13,9 @@ public interface TransacaoService {
      *
      * @param transacaoRequest classe modelo para a realização de uma
      *                     transação.
-     * @return o objeto {@link TransacaoResponse} contendo as informações da transação.
+     * @return o objeto {@link Transacao} contendo as informações da transação.
      */
-    TransacaoResponse criarTransacao(TransacaoRequest transacaoRequest);
+    Transacao criarTransacao(TransacaoRequest transacaoRequest);
 
     /**
      * Procura transações no banco de dados usando datas.
@@ -25,5 +26,5 @@ public interface TransacaoService {
      *             informado a data máxima será o dia atual.
      * @return Page do tipo {@link TransacaoResponse}
      */
-    Page<TransacaoResponse> encontrarTransacoes(String min, String max, Pageable page);
+    Page<Transacao> encontrarTransacoes(String min, String max, Pageable page);
 }
