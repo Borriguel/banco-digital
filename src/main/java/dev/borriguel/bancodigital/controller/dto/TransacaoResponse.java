@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
-public class TransacaoDTO {
+public class TransacaoResponse {
     private Long id;
     private UUID idPagador;
     private BigDecimal valorTransacao;
