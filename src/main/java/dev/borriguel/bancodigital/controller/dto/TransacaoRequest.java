@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
-public class TransacaoPost {
+public class TransacaoRequest {
     @JsonIgnore
     private Long id;
     @NotBlank(message = "Insira o id da conta do pagador.")
