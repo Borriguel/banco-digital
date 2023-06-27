@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://db:5432/banco-digital-db
+    username: admin
+    password: admin
+  jpa:
+    show-sql: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
