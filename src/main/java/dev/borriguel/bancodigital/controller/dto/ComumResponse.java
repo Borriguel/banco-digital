@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
-public class ComumDTO {
+public class ComumResponse {
     private UUID id;
     private BigDecimal saldo;
 }
