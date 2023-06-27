@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
-public class LojistaDTO {
+public class LojistaResponse {
     private UUID id;
     private String cnpj;
     private String nomeEmpresa;
