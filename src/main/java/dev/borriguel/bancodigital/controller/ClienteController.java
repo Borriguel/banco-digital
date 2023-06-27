@@ -1,11 +1,14 @@
 package dev.borriguel.bancodigital.controller;
 
-import dev.borriguel.bancodigital.controller.dto.ClienteDTO;
-import dev.borriguel.bancodigital.controller.dto.ClientePost;
+import dev.borriguel.bancodigital.controller.dto.ClienteRequest;
+import dev.borriguel.bancodigital.controller.dto.ClienteResponse;
 import dev.borriguel.bancodigital.service.ClienteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,54 +24,69 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 @Tag(name = "Cliente", description = "Endpoints do controlador cliente.")
 public class ClienteController {
+    private static final Logger logger = LoggerFactory.getLogger(ClienteController.class);
     private final ClienteService service;
+    private final ModelMapper modelMapper;
 
     @PostMapping
     @Operation(summary = "Cria um novo cliente.")
-    public ResponseEntity<ClienteDTO> criarCliente(@Valid @RequestBody ClientePost clientePost) {
-        var cliente = service.criarCliente(clientePost);
-        return ResponseEntity.status(HttpStatus.CREATED).body(cliente);
+    public ResponseEntity<ClienteResponse> criarCliente(@Valid @RequestBody ClienteRequest clienteRequest) {
+        var cliente = service.criarCliente(clienteRequest);
+        logger.info("Cliente criado -> {}", cliente);
+        var clienteResponse = modelMapper.map(cliente, ClienteResponse.class);
+        return ResponseEntity.status(HttpStatus.CREATED).body(clienteResponse);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Encontra um cliente pelo seu id.")
-    public ResponseEntity<ClienteDTO> encontrarCliente(@PathVariable Long id) {
+    public ResponseEntity<ClienteResponse> encontrarCliente(@PathVariable Long id) {
         var cliente = service.encontrarClientePorId(id);
-        return ResponseEntity.status(HttpStatus.OK).body(cliente);
+        logger.info("Cliente com id {} encontrado -> {}", id, cliente);
+        var clienteResponse = modelMapper.map(cliente, ClienteResponse.class);
+        return ResponseEntity.status(HttpStatus.OK).body(clienteResponse);
     }
 
     @GetMapping("/")
     @Operation(summary = "Encontra um cliente pelo email.")
-    public ResponseEntity<ClienteDTO> encontrarClienteEmail(@RequestParam String email) {
+    public ResponseEntity<ClienteResponse> encontrarClienteEmail(@RequestParam String email) {
         var cliente = service.encontrarClientePorEmail(email);
-        return ResponseEntity.status(HttpStatus.OK).body(cliente);
+        logger.info("Cliente encontrado -> {}", cliente);
+        var clienteResponse = modelMapper.map(cliente, ClienteResponse.class);
+        return ResponseEntity.status(HttpStatus.OK).body(clienteResponse);
     }
 
     @GetMapping
     @Operation(summary = "Encontra uma lista paginada de cliente que contenham no nome a substring informada.")
-    public ResponseEntity<Page<ClienteDTO>> encontrarClientesParteNome(@RequestParam String nome, @ParameterObject Pageable page) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.encontrarClienteParteNome(nome, page));
+    public ResponseEntity<Page<ClienteResponse>> encontrarClientesParteNome(@RequestParam String nome, @ParameterObject Pageable page) {
+        var clientesPaged = service.encontrarClienteParteNome(nome, page);
+        var clientesResponsePaged = clientesPaged.map((cliente) -> modelMapper.map(cliente, ClienteResponse.class));
+        return ResponseEntity.status(HttpStatus.OK).body(clientesResponsePaged);
     }
 
     @GetMapping("/todos")
     @Operation(summary = "Encontra todos os clientes em uma lista paginada.")
-    public ResponseEntity<Page<ClienteDTO>> encontrarTodosClientes(
-            @PageableDefault(size = 10, sort = "id") @ParameterObject Pageable page) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.encontrarTodosClientes(page));
+    public ResponseEntity<Page<ClienteResponse>> encontrarTodosClientes(
+            @PageableDefault(sort = "id") @ParameterObject Pageable page) {
+        var clientesPaged = service.encontrarTodosClientes(page);
+        var clientesResponsePaged = clientesPaged.map((cliente) -> modelMapper.map(cliente, ClienteResponse.class));
+        return ResponseEntity.status(HttpStatus.OK).body(clientesResponsePaged);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Deleta um cliente pelo seu id.")
     public ResponseEntity<Void> deletarCliente(@PathVariable Long id) {
         service.deletarCliente(id);
+        logger.info("Cliente deletado com id -> {}", id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualiza os dados do cliente pelo seu id.")
-    public ResponseEntity<ClienteDTO> atualizarCliente(@PathVariable Long id,
-            @Valid @RequestBody ClientePost clienteDTO) {
-        var clienteAtualizado = service.atualizarCliente(id, clienteDTO);
-        return ResponseEntity.status(HttpStatus.OK).body(clienteAtualizado);
+    public ResponseEntity<ClienteResponse> atualizarCliente(@PathVariable Long id,
+                                                            @Valid @RequestBody ClienteRequest clienteRequest) {
+        var clienteAtualizado = service.atualizarCliente(id, clienteRequest);
+        logger.info("Cliente com id {} atualizado -> {}", id, clienteAtualizado);
+        var clienteResponse = modelMapper.map(clienteAtualizado, ClienteResponse.class);
+        return ResponseEntity.status(HttpStatus.OK).body(clienteResponse);
     }
 }
