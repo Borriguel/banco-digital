@@ -6,12 +6,10 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
-import java.math.BigDecimal;
-import java.util.UUID;
 
 @Data
 @NoArgsConstructor
-public class LojistaPost {
+public class LojistaRequest {
     @Pattern(regexp = "(\\d{14})", message = "Insira um CNPJ sem pontuação.")
     @NotBlank(message = "Campo CNPJ obrigatório.")
     private String cnpj;
