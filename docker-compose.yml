@@ -21,6 +21,8 @@ services:
     ports:
       - "8080:8080"
     command: mvn spring-boot:run
+    environment:
+      - "SPRING_PROFILES_ACTIVE=docker"
     depends_on:
       - db
     networks:
