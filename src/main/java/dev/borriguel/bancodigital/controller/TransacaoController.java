@@ -1,7 +1,7 @@
 package dev.borriguel.bancodigital.controller;
 
-import dev.borriguel.bancodigital.controller.dto.TransacaoDTO;
-import dev.borriguel.bancodigital.controller.dto.TransacaoPost;
+import dev.borriguel.bancodigital.controller.dto.TransacaoResponse;
+import dev.borriguel.bancodigital.controller.dto.TransacaoRequest;
 import dev.borriguel.bancodigital.service.TransacaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,13 +22,13 @@ public class TransacaoController {
 
     @PostMapping
     @Operation(summary = "Cria uma nova transação.", description = "Observação: Apenas contas do tipo comum podem realizar transações, contas lojistas apenas recebem transações.")
-    public ResponseEntity<TransacaoDTO> transacao(@RequestBody TransacaoPost transacaoPost) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.criarTransacao(transacaoPost));
+    public ResponseEntity<TransacaoResponse> transacao(@RequestBody TransacaoRequest transacaoRequest) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.criarTransacao(transacaoRequest));
     }
 
     @GetMapping
     @Operation(summary = "Encontra transações pela data mínima, caso não seja informada o valor padrão será de 7 dias atrás e data máxima que caso não seja informada será a data atual.")
-    public ResponseEntity<Page<TransacaoDTO>> encontrarTransacoes(
+    public ResponseEntity<Page<TransacaoResponse>> encontrarTransacoes(
             @RequestParam(value = "min", defaultValue = "") String min,
             @RequestParam(value = "max", defaultValue = "") String max, @ParameterObject Pageable page) {
         return ResponseEntity.status(HttpStatus.OK).body(service.encontrarTransacoes(min, max, page));
