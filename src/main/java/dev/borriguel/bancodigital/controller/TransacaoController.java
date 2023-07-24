@@ -31,7 +31,7 @@ public class TransacaoController {
         var transacao = service.criarTransacao(transacaoRequest);
         logger.info("Transação realizada -> {}", transacao);
         var transacaoResponse = modelMapper.map(transacao, TransacaoResponse.class);
-        return ResponseEntity.status(HttpStatus.OK).body(transacaoResponse);
+        return ResponseEntity.status(HttpStatus.CREATED).body(transacaoResponse);
     }
 
     @GetMapping
