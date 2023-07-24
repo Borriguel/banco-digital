@@ -21,7 +21,7 @@ public class Comum {
     @Column(columnDefinition = "uuid")
     private UUID id;
     @Column(nullable = false)
-    private BigDecimal saldo;
+    private BigDecimal saldo = BigDecimal.valueOf(10000);
 
     @Override
     public final boolean equals(Object o) {

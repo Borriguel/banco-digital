@@ -31,7 +31,6 @@ public class ComumServiceImpl implements ComumService {
         repository.save(comum);
         cliente.setContaComum(comum);
         clienteRepository.save(cliente);
-        depositar(comum, BigDecimal.valueOf(10000));
         return comum;
     }
 

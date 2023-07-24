@@ -25,7 +25,7 @@ public class Lojista {
     @Column(nullable = false)
     private String nomeEmpresa;
     @Column(nullable = false)
-    private BigDecimal saldo;
+    private BigDecimal saldo = BigDecimal.valueOf(5000);
 
     @Override
     public final boolean equals(Object o) {

@@ -34,7 +34,6 @@ public class LojistaServiceImpl implements LojistaService {
         repository.save(lojista);
         cliente.setContaLojista(lojista);
         clienteRepository.save(cliente);
-        depositar(lojista, BigDecimal.valueOf(5000));
         return lojista;
     }
 
